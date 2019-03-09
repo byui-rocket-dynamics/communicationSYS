@@ -28,26 +28,11 @@ def buildReadCommand(channel):
     #   ended along with channel #
     #   3rd byte is 0
     return []
-    
-def processAdcValue(result):
-    '''Take in result as array of three 
-bytes. 
-       Return the two lowest bits of the 
-2nd byte and
-       all of the third byte'''
-    pass
-        
-def readAdc(channel):
-    if ((channel > 7) or (channel < 0)):
-        return -1
-    r = spi.xfer2(buildReadCommand(channel))
-    return processAdcValue(r)
         
 if __name__ == '__main__':
     try:
         while True:
-            val = readAdc(0)
-            print ("ADC Result: ", str(val))
+            print ("ADC Result: ", str("HelloWorld"))
             time.sleep(5)
     except KeyboardInterrupt:
         spi.close() 
