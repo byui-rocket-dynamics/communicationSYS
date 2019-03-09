@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define CHANNEL 1;
+#define CHANNEL 1
 
 int main()
 {
