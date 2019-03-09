@@ -1,10 +1,8 @@
-Sample Code - Fill in the blanks
-
 #!/usr/bin/env python
 #
 # Bitbang'd SPI interface with an 
 MCP3008 ADC device
-# MCP3008 is 8-channel 10-bit analog to 
+# MCP3008 is 8-channel 10-bit analog to  
 digital converter
 #  Connections are:
 #     CLK => SCLK  
