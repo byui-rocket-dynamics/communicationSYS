@@ -2,13 +2,15 @@
 
 using namespace std;
 
+#define CHANNEL 1;
+
 int main()
 {
    unsigned char buffer[100];
    int fd;
    int result;
    
-   fd = wiringPiSPISetup(1, 500000);
+   fd = wiringPiSPISetup(CHANNEL, 500000);
    printf("Initial Resilt %d", fd);
 
    buffer[0] = 0x76;
