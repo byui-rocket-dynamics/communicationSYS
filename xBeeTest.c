@@ -1,4 +1,7 @@
 #include <wiringPiSPI.h>
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
 
 #define CHANNEL 1
 
