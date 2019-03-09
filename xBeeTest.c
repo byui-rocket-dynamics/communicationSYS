@@ -1,7 +1,5 @@
 #include <wiringPiSPI.h>
 
-using namespace std;
-
 #define CHANNEL 1
 
 int main()
