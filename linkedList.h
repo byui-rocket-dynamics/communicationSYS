@@ -1,29 +1,31 @@
-struct Node
-{
-   unsigned char *data;
-   struct Node *next;
-};
 
-struct LinkedList
+
+typedef struct Node
+{ 
+   unsigned char *data;
+   Node *next;
+}Node;
+
+typedef struct LinkedList
 {
    Node *pHead;
    Node *pTail;
    unsigned char lenMSB;
    unsigned char lenLSB;
-};
+}LinkedList;
 
-void push_back(struct LinkedList *list, unsigned char *data)
+void push_back(LinkedList *list, unsigned char *data)
 {
    Node *temp;
    temp->data = data;
-   temp->next = nullptr;
+   temp->next = NULL;
 
-   if(list->pHead == nullptr)
+   if(list->pHead == NULL)
    {
       list->pHead = temp;
       list->pTail = temp;
    }
-   else if(list->pHead->next == nullptr)
+   else if(list->pHead->next == NULL)
    {
       list->pTail = temp;
       list->pHead->next = list->pTail;
@@ -40,11 +42,11 @@ void push_back(struct LinkedList *list, unsigned char *data)
       list->lenMSB++;
 }
 
-void push_front(struct LinkedList *list, unsigned char *data)
+void push_front(LinkedList *list, unsigned char *data)
 {
    Node *temp;
    temp->data = data;
-   if(list->pTail == nullptr && list->pTail == nullptr)
+   if(list->pTail == NULL && list->pTail == NULL)
    {
       list->pTail = temp;
       list->pHead = temp;
@@ -60,16 +62,16 @@ void push_front(struct LinkedList *list, unsigned char *data)
       list->lenMSB++;
 }
 
-struct Node* find(struct Node *node, unsigned char *data)
+Node* find(struct Node *node, unsigned char *data)
 {
    Node *temp;
    temp = node;
-   while(temp->next != nullptr)
+   while(temp->next != NULL)
    {
       if(temp->data = data)
          return temp;
 
       temp = temp->next;
    }
-   return nullptr;
+   return NULL;
 }

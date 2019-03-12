@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "linkedList.h"
 
-#define START_BYTE                0x7E
+#define START_BYTE               0x7E
 
 // API IDs to send to xBee
 #define AT_COMM_SEND             0x08
@@ -42,17 +42,17 @@ const unsigned char AT_DIOGNOSTIC_COMM[5][2] = {
    "TR" /*Transmission Failure Count*/
 };
 
-struct Packet
+typedef struct Packet
 {
    unsigned char startByte;
    unsigned char lenMSB;
    unsigned char lenLSB;
    unsigned char frameType;
-   struct LinkedList data;
+   LinkedList data;
    unsigned char checksum;
-};
+}Packet;
 
-void TX(struct Packet *packet, struct LinkedList *data)
+void TX(Packet *packet, LinkedList *data)
 {
    packet->frameType = TX_REQ;
    packet->lenMSB = data->lenMSB;
@@ -60,7 +60,7 @@ void TX(struct Packet *packet, struct LinkedList *data)
    
 }
 
-void AT(struct Packet *packet, unsigned char command[], struct LinkedList *parameterVal)
+void AT(Packet *packet, unsigned char command[], LinkedList *parameterVal)
 {
    packet->frameType = AT_COMM_SEND;
    push_front(parameterVal, command[1]);
@@ -69,7 +69,7 @@ void AT(struct Packet *packet, unsigned char command[], struct LinkedList *param
    packet->lenLSB = parameterVal->lenLSB;
 }
 
-void ATQ(struct Packet *packet, unsigned char command, struct LinkedList *parameterVal)
+void ATQ(Packet *packet, unsigned char command, LinkedList *parameterVal)
 {
    packet->frameType = AT_COMM_SEND;
    push_front(parameterVal, command);
