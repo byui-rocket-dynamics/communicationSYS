@@ -3,7 +3,7 @@
 typedef struct Node
 { 
    unsigned char *data;
-   Node *next;
+   struct Node *next;
 }Node;
 
 typedef struct LinkedList
