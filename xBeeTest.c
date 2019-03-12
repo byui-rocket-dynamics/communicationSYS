@@ -1,55 +1,79 @@
-#include <wiringPiSPI.h>
+// #include <wiringPiSPI.h>
 #include <stdio.h>
-#include <errno.h>
-#include <unistd.h>
+#include <stdlib.h>
+#include "linkedList.h"
 
-#define CHANNEL 1
+#define START_BYTE                0x7E
 
-int main()
+// API IDs to send to xBee
+#define AT_COMM_SEND             0x08
+#define AT_COMM_SENDQ            0x09
+#define TX_REQ                   0x10
+#define TX_REQ_EXP               0x11
+#define REMOTE_COMM              0x17
+
+// API IDs to receive from xBee
+#define AT_COMM_RESP             0x88
+#define MODEM_STAT               0x8A
+#define TRANSMIT_STAT            0x8B
+#define ROUTE_PACKET             0x8D
+#define AGRGTE_ADDR_UPDATE_FRAME 0x8E
+#define RX_IND                   0x90
+#define RX_IND_EXP               0x91
+#define RX_DATA_SAMPLE           0x92
+#define NODE_IDENTFY             0x95
+#define REMOTE_COM_RESP          0x97
+
+//Transmit Options
+#define ADDRESS                  0xFFFFFFFE //Last 4 nibbles need to be 0xFFFE (Reserved)
+#define RADIUS                   0x00
+#define TRANS_OPTION             0x00
+
+const unsigned char AT_SERIAL_COMM[7][2] = {
+   "BD" /*Baud Rate*/,              "NB" /*Parity Bit*/,
+   "SB" /*Stop Bits*/,              "RO" /*Packetization Timeout*/
+   "FT" /*Flow Control Treshold*/,  "AP" /*API Mode*/,
+   "AO" /*API Options*/ 
+};
+
+const unsigned char AT_DIOGNOSTIC_COMM[5][2] = {
+   "BC" /*Bytes Transmitted*/,      "DB" /*dB Query of Last Packet*/,
+   "ER" /*Error Count*/,            "GD" /*Good Packets Received*/,
+   "TR" /*Transmission Failure Count*/
+};
+
+struct Packet
 {
-   unsigned char buffer[100];
-   int fd;
-   int result;
+   unsigned char startByte;
+   unsigned char lenMSB;
+   unsigned char lenLSB;
+   unsigned char frameType;
+   struct LinkedList data;
+   unsigned char checksum;
+};
+
+void TX(struct Packet *packet, struct LinkedList *data)
+{
+   packet->frameType = TX_REQ;
+   packet->lenMSB = data->lenMSB;
+   packet->lenLSB = data->lenLSB;
    
-   fd = wiringPiSPISetup(CHANNEL, 500000);
-   printf("Initial Resilt %d", fd);
-
-   buffer[0] = 0x76;
-
-   for(int i = 1; i <= 0x7f; i <<= 1)
-   {
-      // the decimals, colon and apostrophe dots
-      buffer[0] = 0x77;
-      buffer[1] = i;
-      result = wiringPiSPIDataRW(CHANNEL, buffer, 2);
-
-      // The first character
-      buffer[0] = 0x7b;
-      buffer[1] = i;
-      result = wiringPiSPIDataRW(CHANNEL, buffer, 2);
-
-      // The second character
-      buffer[0] = 0x7c;
-      buffer[1] = i;
-      result = wiringPiSPIDataRW(CHANNEL, buffer, 2);
-
-      // The third character
-      buffer[0] = 0x7d;
-      buffer[1] = i;
-      result = wiringPiSPIDataRW(CHANNEL, buffer, 2);
-
-      // The last character
-      buffer[0] = 0x7e;
-      buffer[1] = i;
-      result = wiringPiSPIDataRW(CHANNEL, buffer, 2);
-
-      // Pause so we can see them
-      sleep(5);
-   }
-
-   // clear display again
-   buffer[0] = 0x76;
-   wiringPiSPIDataRW(CHANNEL, buffer, 1);
-
-   return 0;
 }
+
+void AT(struct Packet *packet, unsigned char command[], struct LinkedList *parameterVal)
+{
+   packet->frameType = AT_COMM_SEND;
+   push_front(parameterVal, command[1]);
+   push_front(parameterVal, command[0]);
+   packet->lenMSB = parameterVal->lenMSB;
+   packet->lenLSB = parameterVal->lenLSB;
+}
+
+void ATQ(struct Packet *packet, unsigned char command, struct LinkedList *parameterVal)
+{
+   packet->frameType = AT_COMM_SEND;
+   push_front(parameterVal, command);
+   packet->lenMSB = parameterVal->lenMSB;
+   packet->lenLSB = parameterVal->lenLSB;
+}
+
