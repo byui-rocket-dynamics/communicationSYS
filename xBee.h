@@ -1,5 +1,6 @@
 // #include <wiringPiSPI.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "linkedList.h"
 
 #define START_BYTE               0x7E
@@ -28,17 +29,17 @@
 #define RADIUS                   0x00
 #define TRANS_OPTION             0x00
 
-unsigned char AT_SERIAL_COMM[7][2] = {
-   "BD" /*Baud Rate*/,              "NB" /*Parity Bit*/,
-   "SB" /*Stop Bits*/,              "RO" /*Packetization Timeout*/
-   "FT" /*Flow Control Treshold*/,  "AP" /*API Mode*/,
-   "AO" /*API Options*/ 
+const unsigned char AT_SERIAL_COMM[7][3] = {
+   "BD",/*Baud Rate*/               "NB",/*Parity Bit*/
+   "SB",/*Stop Bits*/               "RO",/*Packetization Timeout*/
+   "FT",/*Flow Control Treshold*/   "AP",/*API Mode*/
+   "AO",/*API Options*/ 
 };
 
-unsigned char AT_DIOGNOSTIC_COMM[5][2] = {
-   "BC" /*Bytes Transmitted*/,      "DB" /*dB Query of Last Packet*/,
-   "ER" /*Error Count*/,            "GD" /*Good Packets Received*/,
-   "TR" /*Transmission Failure Count*/
+const unsigned char AT_DIOGNOSTIC_COMM[5][3] = {
+   "BC",/*Bytes Transmitted*/      "DB",/*dB Query of Last Packet*/
+   "ER",/*Error Count*/            "GD",/*Good Packets Received*/
+   "TR",/*Transmission Failure Count*/
 };
 
 typedef struct Packet
@@ -51,12 +52,13 @@ typedef struct Packet
    unsigned char checksum;
 }Packet;
 
-void TX(Packet *packet, LinkedList *data)
+void TX(Packet *packet, char *data[])
 {
    packet->frameType = TX_REQ;
-   packet->lenMSB = data->lenMSB;
-   packet->lenLSB = data->lenLSB;
-   
+   addData(packet, data);
+   calcLength(packet, data);
+   calcChecksum(data, packet);
+   packetPrint(packet);
 }
 
 void AT(Packet *packet, unsigned char *command[], LinkedList *parameterVal)
@@ -74,5 +76,36 @@ void ATQ(Packet *packet, unsigned char *command, LinkedList *parameterVal)
    push_front(parameterVal, command);
    packet->lenMSB = parameterVal->lenMSB;
    packet->lenLSB = parameterVal->lenLSB;
+}
+
+void calcLength(Packet *packet, char *data[])
+{
+   short length = (short) sizeof(data);
+   packet->lenMSB = (length >> 8) & 0xFF;
+   packet->lenLSB = length & 0xFF;
+}
+
+void addData(Packet *packet, char *data[])
+{
+   for(int i = 0; data[i] != '\0'; i++)
+      push_back(&packet->data, (unsigned char *) data[i]);
+}
+
+void calcChecksum(char *data[], Packet *packet){
+   unsigned char num;
+   for(int i = 0; data[i] != '\0'; i++)
+      num += *data[i];
+   
+   num += packet->lenLSB;
+   num += packet->lenMSB;
+   num += packet->startByte;
+   num += packet->frameType;
+   packet->checksum = 0xFF - num;
+}
+
+void packetPrint(Packet *packet){ 
+   printf("%h %h%h %h ", packet->startByte, packet->lenMSB, packet->lenLSB, packet->frameType);
+   printList(&packet->data);
+   printf(" %h", packet->checksum);
 }
 

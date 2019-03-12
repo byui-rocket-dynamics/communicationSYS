@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 
 typedef struct Node
 { 
@@ -74,4 +74,16 @@ Node* find(struct Node *node, unsigned char *data)
       temp = temp->next;
    }
    return NULL;
+}
+
+void printList(LinkedList *list){
+   if(list->pHead == NULL)
+      return;
+   Node *temp = list->pHead;
+   printf("%h", temp->data);
+   while(temp->next != NULL)
+   {
+      printf("%h", temp->data);
+      temp = temp->next;
+   }
 }
